@@ -14,11 +14,11 @@ class FilterController extends Controller
         $filters = Session::get('filters'); // refactor to DTO
 
         if (! $filters) {
-            $models = Filter::factory()->count(4)->create();
+            $models = Filter::factory()->count(2)->create();
 
             $filters = collect([
-                'enabled' => $models,
-                'disabled' => collect([]),
+                'disabled' => $models,
+                'enabled' => collect([]),
             ]);
 
             Session::put('filters', $filters);
@@ -30,8 +30,8 @@ class FilterController extends Controller
     public function update(Request $request)
     {
         $validated = $request->validate([
-            'enabled' => 'array|present',
-            'disabled' => 'present',
+            'disabled' => 'array|present',
+            'enabled' => 'present',
         ]);
 
         $enabledIds = collect($validated['enabled'])->pluck('id');

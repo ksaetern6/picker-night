@@ -30,6 +30,13 @@ const switchFilters = (index: number, filterToSplice: string, filterToPush: stri
     filters[spliceKey].value.splice(index, 1)
 }
 
+const addNewFilter = async (filter: Filter): Promise<void> => {
+    
+    // disabledFilters.value.push(filter)
+    // console.log(disabledFilters.value)
+    // toast success?
+}
+
 onMounted(async () => {
     startLoading()
 
@@ -74,11 +81,11 @@ onUnmounted(() => {
         <template v-else>
             <div class="pb-4">
                 <p class="text-center pb-2">All Filters</p>
-                <TagsInput :model-value="enabledFilters">
-                    <p v-if="enabledFilters.length === 0" class="text-gray-400">No Filters To Add</p>
+                <TagsInput :model-value="disabledFilters">
+                    <p v-if="disabledFilters.length === 0" class="text-gray-400">No Filters To Add</p>
                     <template v-else>
-                        <TagsInputItem v-for="(item, index) in enabledFilters" :key="index" :value="item" class="hover:bg-primary">
-                            <TagsInputClickable :text="item.name" :index="index" @clicked="(i) => switchFilters(i, 'enabledFilters', 'disabledFilters')" />
+                        <TagsInputItem v-for="(item, index) in disabledFilters" :key="index" :value="item" class="hover:bg-primary">
+                            <TagsInputClickable :text="item.name" :index="index" @clicked="(i) => switchFilters(i, 'disabledFilters', 'enabledFilters')" />
                         </TagsInputItem>
                     </template>
                 </TagsInput>
@@ -86,11 +93,11 @@ onUnmounted(() => {
             
             <div>
                 <p class="text-center pb-2">Enabled Filters</p>
-                <TagsInput :model-value="disabledFilters">
-                    <p v-if="disabledFilters.length === 0" class="text-gray-400">No Filters Selected</p>
+                <TagsInput :model-value="enabledFilters">
+                    <p v-if="enabledFilters.length === 0" class="text-gray-400">No Filters Selected</p>
                     <template v-else>
-                        <TagsInputItem v-for="(item, index) in disabledFilters" :key="index" :value="item" class="hover:bg-red-600">
-                            <TagsInputClickable :text="item.name" :index="index" @clicked="(i) => switchFilters(i, 'disabledFilters', 'enabledFilters')" />
+                        <TagsInputItem v-for="(item, index) in enabledFilters" :key="index" :value="item" class="hover:bg-red-600">
+                            <TagsInputClickable :text="item.name" :index="index" @clicked="(i) => switchFilters(i, 'enabledFilters', 'disabledFilters')" />
                             </TagsInputItem>
                     </template>                
                 </TagsInput>
@@ -98,5 +105,5 @@ onUnmounted(() => {
         </template>  
     </div>
     
-    <FilterSheet :filters="allFilters"></FilterSheet>
+    <FilterSheet :filters="allFilters" @add-new-filter="addNewFilter"></FilterSheet>
 </template>

@@ -18,8 +18,8 @@ class FilterCollection extends ResourceCollection
         $disabled = $this->collection->get('disabled');
 
         return [
-            'enabled' => $enabled->flatten(),
-            'disabled' => $disabled?->flatten() ?? $disabled,
+            'disabled' => $disabled->flatten(),
+            'enabled' => $enabled?->flatten() ?? $enabled,
         ];
     }
 }

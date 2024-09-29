@@ -11,13 +11,17 @@ import type { Filter } from '../FilterSheet.vue';
 
 interface FilterSelectProps {
     selections: Filter[]
+    defaultFilter: string
 }
 
 interface FilterSelectEmits {
     (event: 'updateActiveSelection', payload: Filter): void
 }
 
-const props = defineProps<FilterSelectProps>()
+const props = withDefaults(defineProps<FilterSelectProps>(), {
+    defaultFilter: ''
+})
+
 const emits = defineEmits<FilterSelectEmits>()
 
 const emitSelection = (value: string) => {
@@ -29,7 +33,7 @@ const emitSelection = (value: string) => {
 }
 </script>
 <template>
-    <Select @update:model-value="(value) => emitSelection(value)">
+    <Select @update:model-value="(value) => emitSelection(value)" :default-value="defaultFilter">
         <SelectTrigger>
             <SelectValue placeholder="Select A Filter"></SelectValue>
         </SelectTrigger>
