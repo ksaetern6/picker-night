@@ -17,6 +17,7 @@ Route::get('/', function () {
 
 Route::get('/filters', [FilterController::class, 'index']);
 Route::put('/filters', [FilterController::class, 'update']);
+Route::post('/filters', [FilterController::class, 'post']);
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');

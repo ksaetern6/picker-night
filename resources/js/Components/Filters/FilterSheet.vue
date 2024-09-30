@@ -87,8 +87,6 @@ const saveList = (): void => {
   activeFilter.value.options = textArea.value.split('\n').filter((f) => f.trim() !== '')
 
   emit('addNewFilter', activeFilter.value)
-
-  console.log('toast?')
 }
 </script>
 

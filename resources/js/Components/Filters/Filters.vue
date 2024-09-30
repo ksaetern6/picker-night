@@ -7,6 +7,8 @@ import TagsInputClickable from './Input/TagsInputClickable.vue';
 import { useLoading } from '../Composables/useLoading';
 import Skeleton from '../ui/skeleton/Skeleton.vue';
 import { usePage } from '@inertiajs/vue3';
+import Toaster from '../ui/toast/Toaster.vue';
+import { useToast } from '../ui/toast';
 
 const page = usePage()
 
@@ -14,6 +16,7 @@ const disabledFilters = ref<Filter[]>([])
 const enabledFilters = ref<Filter[]>([])
 
 const { isLoading, startLoading, stopLoading } = useLoading(false);
+const { toast } = useToast()
 
 const allFilters = computed((): Filter[] => enabledFilters.value.concat(disabledFilters.value))
 
@@ -31,10 +34,26 @@ const switchFilters = (index: number, filterToSplice: string, filterToPush: stri
 }
 
 const addNewFilter = async (filter: Filter): Promise<void> => {
-    
-    // disabledFilters.value.push(filter)
-    // console.log(disabledFilters.value)
-    // toast success?
+    const _token: string = (page.props.csrf_token as string)
+
+    fetch('/filters', { 
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': _token
+        },
+        body: JSON.stringify({
+            filters: [filter]
+        })
+    })
+    .then(resp => resp.json())
+    .then((data) => {
+        data.map((filter: Filter) => {
+            disabledFilters.value.push(filter)
+        })
+        toast({ title: 'New Filter Saved', description: 'New filter saved successfully.'})
+    })
+    .catch(err => toast({ title: 'There was an error', variant: 'destructive'}))
 }
 
 onMounted(async () => {
@@ -68,6 +87,7 @@ onUnmounted(() => {
 </script>
 
 <template>
+    <Toaster />
     <div class="pb-4">
         <template v-if="isLoading">
             <div class="flex justify-center items-center flex-col">

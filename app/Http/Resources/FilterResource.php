@@ -15,8 +15,8 @@ class FilterResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'name' => $this->name,
-            'options' => $this->options,
+            'name' => $this['name'],
+            'options' => $this['options'],
         ];
     }
 }

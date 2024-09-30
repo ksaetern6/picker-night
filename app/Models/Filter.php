@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 /**
  * id       string
@@ -17,6 +18,8 @@ class Filter extends Model
 
     public $timestamps = false;
 
+    public $incrementing = false; // Disable auto-incrementing
+
     protected $guarded = [
         'id',
     ];
@@ -24,4 +27,11 @@ class Filter extends Model
     protected $casts = [
         'options' => 'array',
     ];
+
+    public static function booted()
+    {
+        static::creating(function ($model) {
+            $model->id = Str::uuid();
+        });
+    }
 }
