@@ -82,7 +82,7 @@ const addFilter = (): void => {
 }
 
 const saveList = (): void => {
-  if (!activeFilter.value) return // toast error or smth
+  if (!activeFilter.value) return
 
   activeFilter.value.options = textArea.value.split('\n').filter((f) => f.trim() !== '')
 

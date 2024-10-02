@@ -34,7 +34,6 @@ watch(list, (newList) => {
         emit('listUpdate', newList.split('\n')) // remove spaces
     }, 1000)
 })
-// @update:model-value="changeTab('edit-options')"
 </script>
 
 <template>
