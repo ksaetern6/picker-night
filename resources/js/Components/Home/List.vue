@@ -14,6 +14,7 @@ import TabsTrigger from '../ui/tabs/TabsTrigger.vue';
 import TabsContent from '../ui/tabs/TabsContent.vue';
 
 import Filters from '../Filters/Filters.vue';
+import InputIcon from '../InputIcon/InputIcon.vue';
 
 interface ListProps {
     defaultOptions: string
@@ -27,7 +28,6 @@ interface ListEmitEvents {
 const props = defineProps<ListProps>()
 const emit = defineEmits<ListEmitEvents>()
 
-// const list = ref<string>('')
 const activeTab = ref<string>('edit-options')
 
 let timeout: ReturnType<typeof setTimeout>
@@ -66,6 +66,7 @@ const list = computed({
                 <TabsContent value="edit-options">
                     <Textarea class="h-96" placeholder="Add your list here" v-model="list" />
                     <Button class="w-full mt-4" :onclick="() => emit('executeRoulette', true)">Pick An Option!</Button>
+                    <InputIcon class="mt-4 w-9/12 mx-auto"/>
                 </TabsContent>
                 <TabsContent value="edit-filters">
                     <Filters />
