@@ -6,7 +6,7 @@ import CardContent from '@/Components/ui/card/CardContent.vue';
 import CardTitle from '@/Components/ui/card/CardTitle.vue';
 import CardHeader from '@/Components/ui/card/CardHeader.vue';
 import Textarea from '@/Components/ui/textarea/Textarea.vue';
-import { ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import Button from '../ui/button/Button.vue';
 import Tabs from '../ui/tabs/Tabs.vue';
 import TabsList from '../ui/tabs/TabsList.vue';
@@ -15,29 +15,39 @@ import TabsContent from '../ui/tabs/TabsContent.vue';
 
 import Filters from '../Filters/Filters.vue';
 
-interface EmitEvents {
+interface ListProps {
+    defaultOptions: string
+}
+
+interface ListEmitEvents {
     (event: 'listUpdate', payload: string[]): void
     (event: 'executeRoulette', payload: boolean): void
 }
 
-const emit = defineEmits<EmitEvents>()
+const props = defineProps<ListProps>()
+const emit = defineEmits<ListEmitEvents>()
 
-const list = ref<string>('')
+// const list = ref<string>('')
 const activeTab = ref<string>('edit-options')
 
 let timeout: ReturnType<typeof setTimeout>
 
-watch(list, (newList) => {
-    clearTimeout(timeout)
+const list = computed({
+    get() {
+        return props.defaultOptions.length != 0 ? props.defaultOptions : ''
+    },
+    set(newList) {
+        clearTimeout(timeout)
 
-    timeout = setTimeout(() => {
-        emit('listUpdate', newList.split('\n')) // remove spaces
-    }, 1000)
+        timeout = setTimeout(() => {
+            emit('listUpdate', newList.split('\n'))
+        }, 1000)
+    }
 })
+
 </script>
 
 <template>
-    
     <Card class="p-6">
         <CardHeader>
             <CardTitle>Randomizer</CardTitle>
@@ -54,7 +64,7 @@ watch(list, (newList) => {
                     </TabsTrigger>
                 </TabsList>
                 <TabsContent value="edit-options">
-                    <Textarea class="h-96" placeholder="Add your list here" v-model="list"/>
+                    <Textarea class="h-96" placeholder="Add your list here" v-model="list" />
                     <Button class="w-full mt-4" :onclick="() => emit('executeRoulette', true)">Pick An Option!</Button>
                 </TabsContent>
                 <TabsContent value="edit-filters">

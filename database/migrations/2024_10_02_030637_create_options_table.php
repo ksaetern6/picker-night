@@ -11,11 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('filters', function (Blueprint $table) {
+        Schema::create('options', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('name');
-            $table->boolean('enabled')->default(false);
             $table->jsonb('options');
+            $table->timestamps();
         });
     }
 
@@ -24,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('filters');
+        Schema::dropIfExists('options');
     }
 };

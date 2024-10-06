@@ -4,7 +4,6 @@ import { computed, onMounted, ref } from 'vue';
 import ScrollArea from '../ui/scroll-area/ScrollArea.vue';
 import ConfirmationDialog from './ConfirmationDialog.vue';
 
-
 interface RouletteBoxesProps {
     options: string[]
 }
@@ -26,12 +25,12 @@ const cleanOptions = computed((): string[] => {
 })
 
 const cycleItems = () => {
-    let x = 6
+    // let x = 6
     let speed = 50
     let minSpeed = 220
     let index = 0
     let threshold = speed
-    const interval = 2
+    // const interval = 2
     const highSpeedThreshold = 100
     const mediumThreshold = 150
     const slowThreshold = 200
@@ -90,9 +89,7 @@ const cycleItems = () => {
 
     selectIndex()
 }
-defineExpose({
-    cycleItems,
-})
+defineExpose({ cycleItems })
 
 onMounted(() => {
     if (boxes.value) {

@@ -1,22 +1,18 @@
 <?php
 
 use App\Http\Controllers\FilterController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-});
+Route::get('/', [HomeController::class, 'index']);
+Route::put('/', [HomeController::class, 'update']);
+Route::post('/', [HomeController::class, 'create']);
 
 Route::get('/filters', [FilterController::class, 'index']);
-Route::put('/filters', [FilterController::class, 'update']);
+Route::patch('/filters', [FilterController::class, 'update']);
 Route::post('/filters', [FilterController::class, 'post']);
 
 Route::get('/dashboard', function () {

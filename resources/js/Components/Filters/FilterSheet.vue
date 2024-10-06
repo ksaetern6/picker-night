@@ -12,82 +12,67 @@ import {
 } from '@/Components/ui/sheet'
 import FilterSelect from './Select/FilterSelect.vue';
 import Textarea from '../ui/textarea/Textarea.vue';
-import { computed, nextTick, onUnmounted, ref } from 'vue';
+import { nextTick, ref } from 'vue';
 import Input from '../ui/input/Input.vue';
-import { useToast } from '../ui/toast';
-
-interface FilterSheetProps {
-  filters: Filter[]
-}
+import { usePickerStore } from '@/store/store';
+import { useToast } from '@/Components/ui/toast/use-toast'
 
 export interface Filter {
   id: string | null
+  enabled: boolean
   name: string
   options: string[]
 }
 
-interface FilterSheetEmits {
-  (event: 'addNewFilter', payload: Filter): void
-}
-
-
-defineProps<FilterSheetProps>()
-const emit = defineEmits<FilterSheetEmits>()
 const { toast } = useToast()
+const store = usePickerStore()
 
-const activeFilter = ref<Filter>()
+const textArea = ref<string>('')
 const newFilter = ref<string>('')
 const filterInputActive = ref<boolean>(false)
+const activeFilter = ref<Filter | null>();
+const activeIndex = ref<number | null>(null);
 const filterInputRef = ref<InstanceType<typeof Input> | null>(null)
-const textArea = ref<string>('')
 
-const activeList = computed((): string => {
-  return activeFilter.value
-    ? activeFilter.value.options.join('\n')
-    : ''
-})
-
-const changeActiveFilter = (filter: Filter): void => {
+const changeActiveFilter = ({ filter, index }: {filter: Filter, index: number}): void => {
   activeFilter.value = filter
-  textArea.value = activeList.value
+  activeIndex.value = index
+  textArea.value = filter.options.join('\n')
 }
 
-const toggleFilterInput = (): void => {
+const enableFilterInput = (): void => {
+  filterInputActive.value = true
+  newFilter.value = ''
   textArea.value = ''
-  filterInputActive.value = !filterInputActive.value
-  if (filterInputActive.value) {
-    nextTick(() => {
-      filterInputRef.value?.inputRef?.focus()
-    })
-  }
-}
-
-const addFilter = (): void => {
-  let filter: Filter = {
-    id: null,
-    name: newFilter.value,
-    options: []
-  }
-
-  activeFilter.value = filter
-  textArea.value = ''
-
-  const nextEl = filterInputRef.value?.inputRef?.nextElementSibling as HTMLElement | null;
-
-  // toggleFilterInput()
+  activeFilter.value = null
 
   nextTick(() => {
-    nextEl?.focus()
+    filterInputRef.value?.inputRef?.focus()
   })
 }
 
-const saveList = (): void => {
-  if (!activeFilter.value) return
+const saveChanges = async (): Promise<void> => {
+  const filter = {
+    id: activeFilter.value?.id ?? null,
+    enabled: activeFilter.value?.enabled ?? false,
+    name: activeFilter.value?.name ?? newFilter.value,
+    options: textArea.value.split('\n').filter((f) => f.trim() !== '')
+  }
 
-  activeFilter.value.options = textArea.value.split('\n').filter((f) => f.trim() !== '')
-
-  emit('addNewFilter', activeFilter.value)
+  // new filter
+  if (!activeFilter.value) {
+    !await store.addFilter(filter)
+      ? toast({ title: 'Error adding Filter', description: 'There was an error adding the filter', variant: 'destructive', duration: 2000})
+      : toast({ title: 'Filter Added', description: 'Filter Successfully Added', duration: 2000 })
+    
+    filterInputActive.value = false
+    textArea.value = ''
+  } else if (activeIndex.value !== null && filter?.id) {
+    // updating filter
+    store.updateFilterById(filter, filter.id)
+  }
 }
+
 </script>
 
 <template>
@@ -110,18 +95,17 @@ const saveList = (): void => {
           type="text" 
           placeholder="Enter Your Filter Name" 
           ref="filterInputRef" 
-          @blur="addFilter"
-          @keyup.enter="addFilter"/>
-        <FilterSelect v-else :selections="filters" @update-active-selection="changeActiveFilter" :defaultFilter="activeFilter?.name"/>
+          @keyup.enter="() => {}"/>
+        <FilterSelect v-else :selections="store.filters" @update-active-selection="changeActiveFilter" />
         <Textarea class="h-96 mt-4" placeholder="Add options to exclude" v-model="textArea" />
       </div>
       <SheetFooter class="pt-4">
         <div class="grid grid-row-2 gap-4 w-full">
           <div class="flex flex-row justify-evenly">
-            <Button variant="secondary" :onclick="toggleFilterInput">
+            <Button variant="secondary" :onclick="enableFilterInput" :disabled="filterInputActive">
               Add Filter
             </Button>
-            <Button type="submit" :onclick="saveList">
+            <Button type="submit" :onclick="saveChanges">
               Save changes
             </Button>
           </div>

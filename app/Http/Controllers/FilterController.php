@@ -6,7 +6,7 @@ use App\Models\Filter;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Str;
+use Illuminate\Support\Arr;
 
 class FilterController extends Controller
 {
@@ -28,64 +28,57 @@ class FilterController extends Controller
 
     public function post(Request $request)
     {
-        info('wtf');
-
         $validated = $request->validate([
-            'filters' => 'required|array',
-            'filters.*.name' => 'required|string',
-            'filters.*.options' => 'present|array',
+            'filter' => 'required|array',
+            'filter.name' => 'required|string',
+            'filter.enabled' => 'required|boolean',
+            'filter.options' => 'present|array',
         ]);
 
-        $filters = collect($validated['filters'])->map(function ($filter) {
-            return [
-                'id' => Str::uuid(),
-                'name' => $filter['name'],
-                'options' => json_encode($filter['options']),
-            ];
-        });
-
-        Filter::insert($filters->toArray());
-
-        $data = $filters->map(function ($f) {
-            return [
-                'id' => $f['id'],
-                'name' => $f['name'],
-                'options' => json_decode($f['options']),
-            ];
-        });
+        $filter = Filter::create($validated['filter']);
 
         // session
-        $disabledFilters = Session::get('filters.disabled');
-        $enabledFilters = Session::get('filters.enabled');
-
-        Session::put(
-            'filters.disabled',
-            $disabledFilters->merge($data)
-        );
-        Session::put('filters.enabled', $enabledFilters);
+        Session::push('filters', array_merge(
+            ['id' => $filter->id],
+            $validated['filter'],
+        ));
 
         Session::save();
 
-        return response()->json(data: $data, status: 201);
+        return response()->json(data: $filter, status: 201);
     }
 
     public function update(Request $request)
     {
         $validated = $request->validate([
-            'disabled' => 'array|present',
-            'enabled' => 'present',
+            'enabled' => 'sometimes|boolean',
+            'options' => 'sometimes|array',
+            'id' => 'required|string',
         ]);
 
-        $enabledIds = collect($validated['enabled'])->pluck('id');
-        $disabledIds = collect($validated['disabled'])->pluck('id');
+        // model update
+        $filter = Filter::where('id', $validated['id'])
+            ->update(Arr::except($validated, 'id'));
 
-        $enabledFilters = Filter::whereIn('id', $enabledIds)->get();
-        $disabledFilters = Filter::whereIn('id', $disabledIds)->get();
+        // session update
+        $sessionFilters = Session::get('filters', []);
+        if (!$sessionFilters) {
+            // return error
+        }
 
-        // session
-        Session::put('filters.enabled', collect($enabledFilters));
-        Session::put('filters.disabled', collect($disabledFilters));
+        // possible de-sync issue?
+        $newFilters = collect($sessionFilters)->map(function ($f) use ($validated) {
+            if ($f['id'] == $validated['id']) {
+                foreach(array_keys(Arr::except($validated, 'id')) as $key) {
+                    $f[$key] = $validated[$key];
+                }
+            }
+            return $f;
+        });
 
-        return response()->noContent();
+        Session::put('filters', $newFilters);
+        Session::save();
+
+        return response()->json(data: $filter, status: 201);
     }
 }
