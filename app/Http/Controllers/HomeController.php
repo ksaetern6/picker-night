@@ -5,9 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Options;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 class HomeController extends Controller
 {
@@ -26,14 +25,14 @@ class HomeController extends Controller
     public function create(Request $request)
     {
         $validated = $request->validate([
-            'options' => 'required|array'
+            'options' => 'required|array',
         ]);
 
         $model = Options::create($validated);
 
         Session::put('options', [
             'options' => $model->options,
-            'id' => $model->id
+            'id' => $model->id,
         ]);
         Session::save();
 
@@ -43,7 +42,7 @@ class HomeController extends Controller
     }
 
     public function update(Request $request)
-    { 
+    {
         $validated = $request->validate([
             'options' => 'required|array',
             'options_id' => 'required|string',
@@ -52,13 +51,13 @@ class HomeController extends Controller
         $model = Options::where('id', $validated['options_id'])->first();
         $model->options = $validated['options'];
         $model->save();
-        
+
         Session::put('options', [
             'options' => $validated['options'],
-            'id' => $validated['options_id']
+            'id' => $validated['options_id'],
         ]);
         Session::save();
-    
+
         return new JsonResponse(
             data: ['id' => $model->id],
             status: 201);

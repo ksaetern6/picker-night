@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Filter;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Session;
 
 class FilterController extends Controller
 {
@@ -62,17 +62,18 @@ class FilterController extends Controller
 
         // session update
         $sessionFilters = Session::get('filters', []);
-        if (!$sessionFilters) {
+        if (! $sessionFilters) {
             // return error
         }
 
         // possible de-sync issue?
         $newFilters = collect($sessionFilters)->map(function ($f) use ($validated) {
             if ($f['id'] == $validated['id']) {
-                foreach(array_keys(Arr::except($validated, 'id')) as $key) {
+                foreach (array_keys(Arr::except($validated, 'id')) as $key) {
                     $f[$key] = $validated[$key];
                 }
             }
+
             return $f;
         });
 
